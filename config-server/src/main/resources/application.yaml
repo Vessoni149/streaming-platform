@@ -1,0 +1,18 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          # URL de tu repo de configuración que creaste en GitHub
+          uri: https://github.com/Vessoni149/streaming-config-repo
+          default-label: main
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
