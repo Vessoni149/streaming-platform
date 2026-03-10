@@ -2,6 +2,8 @@ package com.streaming.user_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.List;
 @Entity
 @Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -22,11 +25,14 @@ public class User {
     private String password;
     private String firstName;
     private String lastName;
-    private Enum rol;
-    private String subscriptionStatus;
+    private UserRole rol;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "subscription_status")
+    private SubscriptionStatus subscriptionStatus;
+    @CreatedDate
     private LocalDateTime createdAt;
     private Boolean enabled;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "profile", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     @Getter(AccessLevel.NONE)
     private List<Profile> profiles = new ArrayList<>();
 
