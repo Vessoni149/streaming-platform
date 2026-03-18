@@ -1,5 +1,6 @@
 package com.streaming.subscription_service.service;
 
+import com.streaming.subscription_service.clients.UserClient;
 import com.streaming.subscription_service.dto.SubRequestDto;
 import com.streaming.subscription_service.dto.SubResponseDto;
 import com.streaming.subscription_service.dto.SubToUpdateDto;
@@ -21,6 +22,8 @@ public class SubscriptionService implements ISubscriptionService{
     private ISubscriptionRepository subRepo;
     @Autowired
     private SubscriptionMapper subMapper;
+    @Autowired
+    private UserClient userClient;
 
     @Override
     public List<SubResponseDto> getAll() {
@@ -38,6 +41,13 @@ public class SubscriptionService implements ISubscriptionService{
 
     @Override
     public SubResponseDto createSub(SubRequestDto sub) {
+        //Antes de crear la sub verificaremos que el usuario al que le va a pertenecer existe
+        // llamando al user service con Feign
+        Boolean exists = userClient.checkUserExists(sub.getUserId());
+        if (!exists) {
+            throw new ResourceNotFoundException(sub.getUserId(), "User");
+        }
+        //Si existe continua la ejecucion.
         Subscription subToSave = subMapper.toEntity(sub);
         subToSave.setStatus(Status.ACTIVE);
 
@@ -80,4 +90,8 @@ public class SubscriptionService implements ISubscriptionService{
         }
         subRepo.deleteById(id);
     }
+
+
+
+
 }

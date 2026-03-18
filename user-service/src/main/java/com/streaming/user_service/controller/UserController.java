@@ -59,6 +59,12 @@ import java.util.List;
             UserResponseDto updatedUser = userService.updateUser(id, request);
             return ResponseEntity.ok(ApiResponse.success(updatedUser, "User updated successfully"));
         }
+
+        @GetMapping("/exists/{id}")
+        public ResponseEntity<Boolean> exists(@PathVariable Long id) {
+            return ResponseEntity.ok(userService.existsById(id));
+        }
+
     }
 
 

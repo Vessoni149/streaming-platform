@@ -12,5 +12,5 @@ public interface IUserService {
     public UserResponseDto createUser(UserRequestDto user);
     public void deleteUser(Long id);
     public UserResponseDto updateUser(Long id, UpdateUserRequestDto userDto);
-
+    public Boolean existsById(Long id);
 }

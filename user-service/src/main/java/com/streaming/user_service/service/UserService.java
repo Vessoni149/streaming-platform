@@ -78,4 +78,9 @@ public class UserService implements IUserService{
 
         return userMapper.toDto(updated);
     }
+
+    @Override
+    public Boolean existsById(Long id) {
+        return userRepo.existsById(id);
+    }
 }
