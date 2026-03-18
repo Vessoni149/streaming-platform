@@ -5,7 +5,6 @@ import com.streaming.user_service.dto.user.UserRequestDto;
 import com.streaming.user_service.dto.user.UserResponseDto;
 import com.streaming.user_service.exceptions.ResourceNotFoundException;
 import com.streaming.user_service.mapper.UserMapper;
-import com.streaming.user_service.model.SubscriptionStatus;
 import com.streaming.user_service.model.User;
 import com.streaming.user_service.repository.IUserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ public class UserService implements IUserService{
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
         User user = userMapper.toEntity(userRequestDto);
-        user.setSubscriptionStatus(SubscriptionStatus.INACTIVE);
+        user.setSubscriptionStatus(null);
         //Creamos un User para guardar la entidad YA PERSISTIDA en la DB para que contenga el ID.
         User savedUser = userRepo.save(user);
         return userMapper.toDto(savedUser);

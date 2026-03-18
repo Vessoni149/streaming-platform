@@ -15,11 +15,9 @@ import java.util.List;
 @NoArgsConstructor
 public class UserResponseDto {
     private Long id;
-
     private String email;
     private String firstName;
     private String lastName;
-
     private String subscriptionStatus;
     private LocalDateTime createdAt;
     private Boolean enabled;
