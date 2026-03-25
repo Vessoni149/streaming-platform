@@ -1,4 +1,4 @@
-package com.streaming.subscription_service.clients;
+package com.streaming.subscription_service.infrastructure.feignClients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

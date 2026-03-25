@@ -1,10 +1,11 @@
 package com.streaming.subscription_service.service;
 
-import com.streaming.subscription_service.clients.UserClient;
+import com.streaming.subscription_service.infrastructure.feignClients.UserClient;
 import com.streaming.subscription_service.dto.SubRequestDto;
 import com.streaming.subscription_service.dto.SubResponseDto;
 import com.streaming.subscription_service.dto.SubToUpdateDto;
 import com.streaming.subscription_service.exceptions.ResourceNotFoundException;
+import com.streaming.subscription_service.infrastructure.kafka.SubscriptionProducer;
 import com.streaming.subscription_service.mapper.SubscriptionMapper;
 import com.streaming.subscription_service.model.Status;
 import com.streaming.subscription_service.model.Subscription;
@@ -18,12 +19,21 @@ import java.util.List;
 @Service
 public class SubscriptionService implements ISubscriptionService{
 
-    @Autowired
-    private ISubscriptionRepository subRepo;
-    @Autowired
-    private SubscriptionMapper subMapper;
-    @Autowired
-    private UserClient userClient;
+
+    private final SubscriptionProducer subscriptionProducer;
+    private final ISubscriptionRepository subRepo;
+    private final UserClient userClient;
+    private final SubscriptionMapper subMapper;
+
+    public SubscriptionService(SubscriptionProducer subscriptionProducer,
+                               ISubscriptionRepository subRepo,
+                               UserClient userClient,
+                               SubscriptionMapper subMapper) {
+        this.subscriptionProducer = subscriptionProducer;
+        this.subRepo = subRepo;
+        this.userClient = userClient;
+        this.subMapper = subMapper;
+    }
 
     @Override
     public List<SubResponseDto> getAll() {
@@ -43,9 +53,11 @@ public class SubscriptionService implements ISubscriptionService{
     public SubResponseDto createSub(SubRequestDto sub) {
         //Antes de crear la sub verificaremos que el usuario al que le va a pertenecer existe
         // llamando al user service con Feign
-        Boolean exists = userClient.checkUserExists(sub.getUserId());
+        Long userId = sub.getUserId();
+        Boolean exists = userClient.checkUserExists(userId);
         if (!exists) {
-            throw new ResourceNotFoundException(sub.getUserId(), "User");
+            throw new ResourceNotFoundException(userId, "User");
+
         }
         //Si existe continua la ejecucion.
         Subscription subToSave = subMapper.toEntity(sub);
@@ -53,6 +65,7 @@ public class SubscriptionService implements ISubscriptionService{
 
         LocalDateTime now = LocalDateTime.now();
         subToSave.setStartDate(now);
+        subToSave.setCreatedAt(now);
         subToSave.setEndDate(now.plusMonths(1).plusDays(5));
         subToSave.setNextBill(now.plusMonths(1));
 
@@ -64,6 +77,7 @@ public class SubscriptionService implements ISubscriptionService{
         };
         subToSave.setPrice(finalPrice);
         subRepo.save(subToSave);
+        subscriptionProducer.sendStatusUpdate(userId, "ACTIVE");
         return subMapper.toDto(subToSave);
     }
 
