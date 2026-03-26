@@ -1,6 +1,7 @@
 package com.streaming.subscription_service.service;
 
-import com.streaming.subscription_service.clients.UserClient;
+import com.streaming.subscription_service.infrastructure.feignClients.UserClient;
+import com.streaming.subscription_service.infrastructure.kafka.SubscriptionProducer;
 import com.streaming.subscription_service.dto.SubRequestDto;
 import com.streaming.subscription_service.dto.SubResponseDto;
 import com.streaming.subscription_service.dto.SubToUpdateDto;
@@ -24,6 +25,8 @@ public class SubscriptionService implements ISubscriptionService{
     private SubscriptionMapper subMapper;
     @Autowired
     private UserClient userClient;
+    @Autowired
+    private SubscriptionProducer subProducer;
 
     @Override
     public List<SubResponseDto> getAll() {
@@ -64,6 +67,7 @@ public class SubscriptionService implements ISubscriptionService{
         };
         subToSave.setPrice(finalPrice);
         subRepo.save(subToSave);
+        subProducer.sendStatusUpdate(sub.getUserId(), "ACTIVE");
         return subMapper.toDto(subToSave);
     }
 
